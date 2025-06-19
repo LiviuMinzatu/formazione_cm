@@ -1,0 +1,60 @@
+---
+- name: Setup del Docker Registry on Ubuntu
+  hosts: localhost
+  connection: local
+  become: yes
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+
+  tasks:
+    - name: Install Docker semplice
+      apt:
+        name: docker.io
+        state: present
+        update_cache: yes # Verifica che il cache dei pacchetti sia aggiornata
+
+    - name: Install pip per Python 3
+      apt:
+        name: python3-pip
+        state: present # Assicura che pip per Python 3 sia installato
+
+    - name: Install Docker SDK for Python e decessita di pip
+      pip:
+        name: docker
+        executable: pip3
+
+    - name: Start Docker service
+      service:
+        name: docker
+        state: started # Assicura che il servizio Docker sia avviato
+        enabled: true
+
+    - name: Add vagrant user to docker group
+      user:
+        name: vagrant
+        groups: docker # Aggiunge l'utente vagrant al gruppo docker
+        append: yes # Assicura che l'utente vagrant sia aggiunto senza rimuovere altri gruppi
+
+    - name: Crea directory per il Docker Registry
+      file:
+        path: /opt/registry # Crea la directory per il Docker Registry
+        state: directory # Assicura che la directory esista
+        owner: root
+        group: root
+        mode: '0755' # Imposta i permessi della directory
+
+    - name: Avvia container Docker Registry
+      docker_container:
+        name: registry
+        image: registry:2 # Usa l'immagine ufficiale del Docker Registry
+        state: started
+        restart_policy: always # Assicura che il container si riavvii automaticamente
+        published_ports:
+          - "5000:5000" # Mappa la porta 5000 del container alla porta 5000 dell'host
+        volumes:
+          - /opt/registry:/var/lib/registry # Monta la directory locale nel container per la persistenza dei dati
+
+
+# Per visualizzare i log del container registry, usare il comando:
+# docker logs registry 
+# oppure curl http://localhost:5000/v2/_catalog per verificare che il registry sia in esecuzione.
