@@ -1,0 +1,17 @@
+- hosts: all
+
+  # Carica le variabili da un file cifrato con Ansible Vault
+  vars_files:
+    - vars/secrets.yml
+
+  tasks:
+    # Primo task crea un file di configurazione usando un template
+    - name: Crea un file di configurazione del registry
+      template:
+        src: templates/registry.conf.j2  # Template da usare
+        dest: /tmp/registry.conf         # File di destinazione
+
+    # Secondo task stampa le variabili decriptate nel terminale
+    - name: Mostra credenziali decriptate
+      debug:
+        msg: "Username: {{ registry_user }}, Password: {{ registry_pass }}"
