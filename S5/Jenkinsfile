@@ -1,0 +1,24 @@
+pipeline {
+    agent any
+
+    environment {
+        REGISTRY = "192.168.56.10:5000"
+        IMAGE_NAME = "myapp"
+        BUILD_TAG = "${env.BUILD_NUMBER}"
+        DOCKER_IMAGE = "${REGISTRY}/${IMAGE_NAME}:${BUILD_TAG}"
+    }
+
+    stages {
+        stage('Build Docker Image') {
+            steps {
+                sh "docker build -t ${DOCKER_IMAGE} ."
+            }
+        }
+
+        stage('Push to Registry') {
+            steps {
+                sh "docker push ${DOCKER_IMAGE}"
+            }
+        }
+    }
+}
