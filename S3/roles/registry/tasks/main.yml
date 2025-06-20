@@ -1,0 +1,9 @@
+# Avvia un container locale che funge da Docker Registry privato
+- name: Avvio registry
+  community.docker.docker_container:
+    name: registry                 # Nome del container
+    image: registry:2             # Immagine del registry Docker (versione 2)
+    state: started                # Assicura che il container sia avviato
+    restart_policy: always        # Riavvia il container automaticamente in caso di crash o riavvio del sistema
+    published_ports:
+      - "5050:5000"               # Espone la porta 5000 del container sulla porta 5050 dell'host, purtroppo sulla mia macchina non posso liberare quella porta

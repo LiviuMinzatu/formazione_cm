@@ -1,0 +1,10 @@
+# Avvia i container scaricandoli dal registry locale
+- name: Avvia container
+  community.docker.docker_container:
+    name: "{{ item.name }}"                             # Nome da assegnare al container
+    image: "{{ registry_url }}/{{ item.name }}:latest"  # Immagine da usare, prelevata dal registry locale
+    state: started                                      # Garantisce che il container sia avviato
+    restart_policy: always                              # Riavvia il container in caso di arresto
+    published_ports:
+      - "{{ item.port }}:22"                            # Espone la porta 22 del container su una porta dell’host (definita nella variabile)
+  loop: "{{ containers }}"                              # Esegue il task per ogni container definito nella lista 'containers'

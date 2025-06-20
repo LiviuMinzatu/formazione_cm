@@ -1,0 +1,12 @@
+# URL del registry Docker locale (porta 5050 sul localhost)
+registry_url: "localhost:5050"
+
+# Lista dei container da buildare e avviare
+containers:
+  - name: debian_container               # Nome del container per Debian
+    path: ./macchine/Debian             # Percorso alla directory con il Dockerfile di Debian
+    port: 8081                          # Porta sulla quale esporre il container Debian (porta host  porta 22 container)
+
+  - name: rocky_container                # Nome del container per Rocky
+    path: ./macchine/Rocky              # Percorso alla directory con il Dockerfile di Rocky
+    port: 8082                          # Porta sulla quale esporre il container Rocky (porta host  porta 22 container)

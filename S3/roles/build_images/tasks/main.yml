@@ -1,0 +1,16 @@
+# Task per costruire le immagini Docker da file Dockerfile presenti nelle rispettive cartelle
+- name: Build delle immagini
+  community.docker.docker_image:
+    name: "{{ item.name }}"                   # Nome dell'immagine da costruire (es. debian_container, rocky_container) che va a prendere da vars.yml
+    tag: latest                               # Tag dell'immagine (latest) di default
+    source: build                             # Specifica che l'immagine deve essere costruita da Dockerfile tramite build
+    build:
+      path: "{{ item.path }}"                 # Percorso dove si trova il Dockerfile della container (es. ./macchine/Debian) 
+      dockerfile: Dockerfile                 # Nome del file Dockerfile da usare per la build
+      args:
+        SSH_PUB_KEY: "{{ lookup('file', ssh_key_path) }}"  # Passa la chiave pubblica come build arg per Docker
+      nocache: true                           # Disabilita la cache per forzare una build completa ogni volta, ci mette di piu pero serve a me
+    push: false                               # Non fa il push automatico dopo la build (lo facciamo nel task successivo)
+    force_source: true                        # Forza sempre la build anche se l'immagine esiste già
+    repository: "{{ registry_url }}/{{ item.name }}"  # Repository dove sarà taggata l’immagine (es. localhost:5050/debian_container)
+  loop: "{{ containers }}"                    # Esegue il task per ogni container definito nella variabile containers

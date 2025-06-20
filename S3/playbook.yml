@@ -1,0 +1,21 @@
+# Playbook principale - Step 3: gestisce tutte le fasi per creare e avviare i container
+- name: playbook principale che fa tutto
+  hosts: localhost                          # Esegue tutto localmente sulla macchina host
+
+  vars:
+    registry_url: "localhost:5050"          # URL del registry Docker locale 
+    ssh_key_path: "./id_key_genericuser.pub" # Percorso alla chiave pubblica SSH da iniettare nei container, nella main directory
+
+    containers:                             # Lista dei container da costruire e avviare
+      - name: debian_container
+        path: ./macchine/Debian             # Directory contenente il Dockerfile per Debian
+        port: 8081                          # Porta host da mappare sulla porta 22 del container
+      - name: rocky_container
+        path: ./macchine/Rocky              # Directory contenente il Dockerfile per Rocky
+        port: 8082                          # Porta host da mappare sulla porta 22 del container
+
+  roles:
+    - registry                              # Avvia il container del registry locale
+    - build_images                          # Costruisce le immagini dei container
+    - push_images                           # Fa il tag e il push delle immagini sul registry
+    - run_containers                        # Avvia i container mappando la porta SSH

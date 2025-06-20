@@ -1,0 +1,9 @@
+# Task per taggare l'immagine Docker con il nome del registry locale
+- name: Tag immagine per registry
+  command: docker tag {{ item.name }}:latest {{ registry_url }}/{{ item.name }}:latest
+  loop: "{{ containers }}"  # Applica il task a ogni container definito nella variabile 'containers'
+
+
+- name: Push image to local registry
+  command: docker push {{ registry_url }}/{{ item.name }}:latest
+  loop: "{{ containers }}"  
