@@ -1,0 +1,62 @@
+- name: Build di Rocky e Debian
+
+  # Eseguo il playbook sulla macchina corrente in questo caso localhost
+  hosts: localhost
+
+  # Connessione locale, senza usare SSH
+  connection: local
+
+  # Variabile: percorso alla chiave pubblica da inserire nei container
+  vars:
+    ssh_key_path: "{{ playbook_dir }}/id_key_genericuser.pub"
+
+  tasks:
+    
+    # Costruzione immagine
+    - name: Build Debian container image
+      community.docker.docker_image:
+        name: ssh_debian_manual                # nome dell'immagine
+        tag: latest                            # tag dell'immagine
+        source: build                          # indica che va fatta la build
+        build:
+          path: "{{ playbook_dir }}/OS/Debian"  # path alla directory con il Dockerfile
+          dockerfile: Dockerfile                # nome del Dockerfile
+          args:
+            SSH_PUB_KEY: "{{ lookup('file', ssh_key_path) }}"  # passa la chiave pubblica come argomento di build
+          pull: true                            # scarica sempre la base image aggiornata
+          nocache: true                         # forza la rebuild completa dell'immagine
+
+    # Avvia il container Debian appena costruito
+    - name: Run Debian container
+      community.docker.docker_container:
+        name: ssh_debian_manual                 # nome del container
+        image: ssh_debian_manual:latest         # immagine da usare
+        state: started                          # assicura che il container sia in esecuzione
+        restart_policy: always                  # fa ripartire il container in caso di errore
+        published_ports:
+          - "2222:22"                           # mappa la porta 22 interna sulla 2222 esterna
+
+
+    # Costruisce l'immagine Docker basata su Rocky
+    - name: Build Rocky container image
+      community.docker.docker_image:
+        name: ssh_rocky_manual
+        tag: latest
+        source: build
+        build:
+          path: "{{ playbook_dir }}/OS/Rocky"
+          dockerfile: Dockerfile
+          args:
+            SSH_PUB_KEY: "{{ lookup('file', ssh_key_path) }}"
+          pull: true
+          nocache: true
+
+    # Avvia il container Rocky appena costruito
+    - name: Run Rocky container
+      community.docker.docker_container:
+        name: ssh_rocky_manual
+        image: ssh_rocky_manual:latest
+        state: started
+        restart_policy: always
+        published_ports:
+          - "2223:22"                           # mappa la porta 22 interna sulla 2223 esterna
